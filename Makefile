@@ -1,13 +1,14 @@
 default: build
 
 # Variables
-DSPONSOR_FACTORY = CB334WURH6W3MQIE3NUL4DGXS7NDUMSEQ234EB2YNXMCMXLJS6P4MQ2I
-DSPONSOR_ADMIN = CCHLMFB5BOUWWA6YWSCM33P7IXLDJSBRK2AQYFSBHPXMT3EJ7YUH5IU5
-NFT_CONTRACT = CAP6CNBYGE7D6LVPIWNIHQX5QTR3IFCGGYMVZTCSLCC5VVLE43NT4WUF
-SOURCE_ACCOUNT = siborg
-FEE_RECIPIENT = siborg
-NATIVE_XLM=CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
-NETWORK = testnet
+DSPONSOR_FACTORY = CAIFM7W2WMSIIDBPIACGG5FNXZ44DEPEYF7TDKIQ4BRNRT5E6VI33NWR
+DSPONSOR_ADMIN = CDH3FBNCCBXJXVBME2CF4QZYS27RJFSUVXKRHD5DYVKCKQDCAK6UZBN3
+DSPONSOR_MARKET = CCPJBIVAAXV2N3XNUO4IKILPPP3NDMFBBT7TABY2DO6ABOKSDRMKZJDM
+NFT_CONTRACT = CCPO3TEPSH2JW6AMCDIUOZ7VNX3LQCFIJEZEAWI64PN5RDQLCUQ64ED6 # Just for testing purposes
+SOURCE_ACCOUNT = siborg-mainnet
+FEE_RECIPIENT = siborg-mainnet
+NATIVE_XLM=CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA
+NETWORK = mainnet
 
 all: test deploy-factory deploy
 
@@ -15,9 +16,10 @@ test: build
 	cargo test
 
 build:
-	cd dsponsor && cargo build --target wasm32-unknown-unknown --release
-	cd dsponsor-factory && cargo build --target wasm32-unknown-unknown --release
-	cd dsponsor-admin && cargo build --target wasm32-unknown-unknown --release
+	cd dsponsor && cargo build --target wasm32v1-none --release
+	cd dsponsor-factory && cargo build --target wasm32v1-none --release
+	cd dsponsor-admin && cargo build --target wasm32v1-none --release
+	cd dsponsor-market && cargo build --target wasm32v1-none --release
 
 fmt:
 	cargo fmt
@@ -30,21 +32,28 @@ clean:
 
 deploy: 
 	stellar contract deploy \
- 	--wasm target/wasm32-unknown-unknown/release/dsponsor_admin.wasm \
+ 	--wasm target/wasm32v1-none/release/dsponsor_admin.wasm \
 	--source ${SOURCE_ACCOUNT} \
-	--network testnet 
+	--network ${NETWORK} 
+	-- --simulate
 
 deploy-factory: 
 	stellar contract deploy \
- 	--wasm target/wasm32-unknown-unknown/release/dsponsor_factory.wasm \
+ 	--wasm target/wasm32v1-none/release/dsponsor_factory.wasm \
 	--source ${SOURCE_ACCOUNT} \
-	--network testnet \
+	--network ${NETWORK} \
+
+deploy-market:
+	stellar contract deploy \
+	 --wasm target/wasm32v1-none/release/dsponsor_market.wasm \
+	 --source ${SOURCE_ACCOUNT} \
+	 --network ${NETWORK} \
 
 deploy-simple-nft: 
 	stellar contract deploy \
- 	--wasm target/wasm32-unknown-unknown/release/dsponsor.wasm \
+ 	--wasm target/wasm32v1-none/release/dsponsor.wasm \
 	--source ${SOURCE_ACCOUNT} \
-	--network testnet \
+	--network ${NETWORK} \
 
 # Initialize the contract
 initialize:
@@ -59,6 +68,18 @@ initialize:
 		--native_xlm $(NATIVE_XLM) \
 		--bps 100 \
 		--admin $(SOURCE_ACCOUNT) \
+
+# Initialize the market contract
+initialize-market:
+	stellar contract invoke \
+		--id $(DSPONSOR_MARKET) \
+		--source $(SOURCE_ACCOUNT) \
+		--network $(NETWORK) \
+		-- \
+		initialize \
+		--admin $(SOURCE_ACCOUNT) \
+		--native_xlm $(NATIVE_XLM) \
+		--fee_bps 100 \
 
 create_offer:
 	stellar contract invoke \
@@ -97,7 +118,7 @@ get_nft_tokens:
 		--network $(NETWORK) \
 		-- \
 		get_user_tokens \
-		--user GDBCM52LC5QLPN4LRCRU22DYAKRUYLRJMTMBOQKK7RNZIQUZHSAEUMON \
+		--user GDBCM52A7NMCHYYCWE3H52DP42RZEISOPUQWE4PQZ7JL3OLFL2UBTKER \
 
 approve_native_xlm:
 	stellar contract invoke \
@@ -125,5 +146,18 @@ admin-ready:
 	make sdk-gen
 
 .PHONY: default all test build build-debug fmt clean
+
+
+# nft testing:
+
+nft-allowance:
+	stellar contract invoke \
+		--id $(NFT_CONTRACT) \
+		--source $(SOURCE_ACCOUNT) \
+		--network $(NETWORK) \
+		-- \
+		is_approved \
+		--operator $(DSPONSOR_MARKET) \
+		--token_id 3 \
 
 # soroban contract asset id --asset native --network testnet

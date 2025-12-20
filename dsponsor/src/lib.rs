@@ -296,9 +296,12 @@ impl DSponsorNFT {
             let appr_key = DataKey::Approvals(token_id);
 
             env.storage().persistent().set(&owner_key, &to);
+            // Clear any existing rental and set new owner as user
+            let renter_key = DataKey::Renter(token_id);
+            env.storage().persistent().remove(&renter_key);
+            let expiry_time = env.ledger().timestamp() + 3153600000000;  // as long as possible
+            Self::__set_user(env.clone(), to.clone(), token_id, to.clone(), expiry_time);
             env.storage().persistent().remove(&appr_key);
-            let expiry_time = env.ledger().timestamp() + 3153600000000;  // as long as possible for the minted
-            Self::__set_user(env.clone(), owner.clone(), token_id, to.clone(), expiry_time);  
             env.events()
                 .publish((symbol_short!("Transfer"),), (owner, to, token_id));
         } else {
@@ -343,10 +346,13 @@ impl DSponsorNFT {
         if !approvals.contains(&spender) {
             panic!("Spender is not approved for this token");
         }
-        let expiry_time = env.ledger().timestamp() + 3153600000000;  // as long as possible for the minted
-        Self::__set_user(env.clone(), spender.clone(), token_id, to.clone(), expiry_time);  
         let owner_key = DataKey::Owner(token_id);
         env.storage().persistent().set(&owner_key, &to);
+        // Clear any existing rental and set new owner as user
+        let renter_key = DataKey::Renter(token_id);
+        env.storage().persistent().remove(&renter_key);
+        let expiry_time = env.ledger().timestamp() + 3153600000000;  // as long as possible
+        Self::__set_user(env.clone(), to.clone(), token_id, to.clone(), expiry_time);
         env.storage().persistent().remove(&key);
 
         env.events()

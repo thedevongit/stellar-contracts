@@ -1,7 +1,8 @@
 # Rust's output directory
 target/debug
 target/release
-
+target/wasm32v1-none/release
+target 
 # Local settings
 .soroban
 .stellar

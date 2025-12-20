@@ -1,1 +1,0 @@
-/home/ferdinand/Perso/Siborg/Contracts/target/wasm32-unknown-unknown/release/dsponsor_admin.wasm: /home/ferdinand/Perso/Siborg/Contracts/dsponsor-admin/src/lib.rs /home/ferdinand/Perso/Siborg/Contracts/dsponsor-admin/src/test.rs

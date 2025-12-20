@@ -3,7 +3,8 @@ resolver = "2"
 members = [
     "dsponsor-admin",
     "dsponsor-factory",
-    "dsponsor"
+    "dsponsor",
+    "dsponsor-market"
 ]
 
 [workspace.package]

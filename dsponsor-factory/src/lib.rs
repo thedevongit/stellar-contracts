@@ -6,7 +6,7 @@ use dsponsor::InitParams;
 use soroban_sdk::{contract, contractimpl, symbol_short, Address, BytesN, Env, IntoVal, Val, Vec};
 
 mod dsponsor {
-    soroban_sdk::contractimport!(file = "../target/wasm32-unknown-unknown/release/dsponsor.wasm");
+    soroban_sdk::contractimport!(file = "../target/wasm32v1-none/release/dsponsor.wasm");
 }
 
 #[contract]

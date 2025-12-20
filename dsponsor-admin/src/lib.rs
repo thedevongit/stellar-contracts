@@ -7,7 +7,7 @@ use soroban_sdk::{
 };
 
 mod dsponsor {
-    soroban_sdk::contractimport!(file = "../target/wasm32-unknown-unknown/release/dsponsor.wasm");
+    soroban_sdk::contractimport!(file = "../target/wasm32v1-none/release/dsponsor.wasm");
 }
 
 mod dfactory {
@@ -15,7 +15,7 @@ mod dfactory {
     type InitParams = crate::InitParams;
 
     soroban_sdk::contractimport!(
-        file = "../target/wasm32-unknown-unknown/release/dsponsor_factory.wasm"
+        file = "../target/wasm32v1-none/release/dsponsor_factory.wasm"
     );
 }
 
